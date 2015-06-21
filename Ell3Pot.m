@@ -7,7 +7,7 @@ G=6.67e-11;
 eps = 1e-12;
 
 if (c>b)
-    U=Ell3Pot(a,c,b,x,z,y,rho)
+    U=Ell3Pot(a,c,b,x,z,y,rho);
 else
     
     if (w<1+eps)
