@@ -6,8 +6,9 @@ for i=1:numel(rhocorei)
     
     if (rhoouteri(i)>0)
 
-        %[fhi(i,:),fval]=HydrostaticStateExact2l(router,rcorei(i),T,rhoouteri(i),rhocorei(i),0.1,0.1);
-        [fhi(i,:)]=HydrostaticState2LayerAn(rcorei(i),router,T,rhocorei(i),rhoouteri(i),0.1,0.1,1);
+        [fhi(i,:),fval]=HydrostaticStateExact2l(router,rcorei(i),T,...
+            rhoouteri(i),rhocorei(i),0.1,0.1);
+        %[fhi(i,:)]=HydrostaticState2LayerAn(rcorei(i),router,T,rhocorei(i),rhoouteri(i),0.1,0.1,1);
         
         fouter0=fhi(i,1);
         fcore0=fhi(i,2);      
