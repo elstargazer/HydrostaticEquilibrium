@@ -7,7 +7,6 @@ G=6.67384e-11;
 GM=62.68e9; % PCK version 0.2
 T=9.073859324514187; % DLR
 
-
 Rref=500000;
 
 % Equatorial semi-axis (km)   487.30  1.8
@@ -31,19 +30,20 @@ fpb_obs=(b3-c3)/b3;
 
 fp_obs=(sqrt(a3*b3)-c3)/sqrt(a3*b3);
 
-
 c=[446.1255 447.8000];
 sigmaa=[0.0 0.0];
 sigmac=[0.0 0.0];
 
-fntsize=35;
-fntsize_sm=23;
-imsize=[54 38];
-
 Nconf=numel(a);
 ModelIn=1;
 
+%% figure settings 
 
+fntsize = 12;
+fntsize_sm = 10;
+im_size=[0 0 13 9];
+
+fig_folder='~/Dawn/Papers/CeresPaper1/';
 
 %% Preliminary conmutations
 
@@ -69,49 +69,6 @@ rhomean=rhomean(ModelIn);
 g=GM./(router.^2);
 % fouter_obs=fouter_obs(ModelIn);
 
-%% Homogeneous Ceres
-
-Th=8:0.1:10;
-
-f0=0.01;
-
-fh_tc=HydrostaticStateExact(router(2),T,rhomean,f0);
-
-for i=1:numel(Th)
-    if (i>1)
-        f0=fh(i-1);
-    else
-        f0=0.001;
-    end
-    [fh(i),fval]=HydrostaticStateExact(router(2),Th(i),rhomean,f0);   
-end
-
-figure; hold on;
-set(gca,'FontSize',fntsize);
-plot(Th,fh,'-k','LineWidth',3);
-plot(get(gca,'XLim'),ones(1,2)*fouter_obs(1),'-b','LineWidth',2);
-plot(get(gca,'XLim'),ones(1,2)*fouter_obs(2),'--b','LineWidth',2);
-
-plot([T T],get(gca,'YLim'),'-r','LineWidth',2);
-
-% plot(get(gca,'XLim'),ones(1,2)*fpa_obs,'-r','LineWidth',2);
-% plot(get(gca,'XLim'),ones(1,2)*fpb_obs,'--r','LineWidth',2);
-
-[ah,bh,ch]=fr2abc(router(2),fh_tc,0);
-
-sigma_nh=(ah-a(2)*1000)*rhomean*g(2);
-sigma_nh/1e6;
-
-
-xlabel('Rotation period [h]','FontSize',fntsize);
-ylabel('Outer flattening []','FontSize',fntsize);
-box on;
-grid on;
-
-legend({'f_{p, homogeneous} ','f_{p, DLR}','f_{p, JPL}'},'FontSize',fntsize_sm)
-
-set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
-
 %% Grid of core radii and densities
 rcore=0:2500:470000;
 rhocoreg=2000:100:6000;
@@ -125,10 +82,12 @@ for i=1:Nconf
 end
 
 %% Plotting settings
-fig1=figure; hold on; 
-ax1=gca;
-set(ax1,'FontSize',fntsize);
-box on;
+
+figure;
+set(gcf, 'Units','centimeters', 'Position',im_size)
+set(gcf, 'PaperPositionMode','auto')
+set(gca, 'FontSize',fntsize);
+hold on;box on;grid on;
 
 xlim([10 450]);
 ylim([2000 6000]);
@@ -144,7 +103,6 @@ ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
 caxis([920 rhomean]);
 plot(get(gca,'xlim'),[rhomean rhomean],'--k','LineWidth',3);
-set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
 
 %% Contour core flattening
 
@@ -155,7 +113,7 @@ set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
 %% Contour outerflattening
 
 fouteri_n=fouteri{ModelIn};
-fouteri_n((fouteri_n<0) | isnan(rhoouteri{ModelIn}) )=NaN;
+fouteri_n((fouteri_n<0) | isnan(rhoouteri{ModelIn}) )= NaN;
 
 levels=0.045:0.005:0.6;
 [C,h]=contour(rcorei/1000,rhocorei,fouteri_n,levels,'Color',...
@@ -190,10 +148,15 @@ clabel(C,h,'manual','FontSize',fntsize_sm,'Color','k','EdgeColor','k','BackGroun
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
+
+PrintWhite([fig_folder 'Fig_2layer.eps']);
+
 %% Plot ice shell thickness
-fig6=figure; hold on; 
-ax1=gca;
-set(ax1,'FontSize',fntsize);
+figure;
+set(gcf, 'Units','centimeters', 'Position',im_size)
+set(gcf, 'PaperPositionMode','auto')
+set(gca, 'FontSize',fntsize);
+hold on;box on;grid on;
 
 for i=1:Nconf
     
@@ -206,10 +169,12 @@ end
 
 xlabel('Mantle density [kg/m^{3}]','FontSize',fntsize);
 ylabel('Ice shell thickness[km]','FontSize',fntsize);
-box on;
-grid on;
 
-set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
+
+legend({'SPG','SPC'},'FontSize',fntsize_sm);
+PrintWhite([fig_folder 'Fig_IceThickness.eps']);
+
+
 
 %% Computing hydrostatic J2
 % 
@@ -233,7 +198,6 @@ set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
 
 
 % [C,h]=contour(rcorei/1000,rhocorei,J2hi,'Color',[0 1 1],'LineStyle','-','LineWidth',2);
-
 
 % nc=50;
 % mc=30;
