@@ -70,8 +70,11 @@ g=GM./(router.^2);
 % fouter_obs=fouter_obs(ModelIn);
 
 %% Grid of core radii and densities
-rcore=0:2500:470000;
-rhocoreg=2000:100:6000;
+% rcore=2500:500:470000;
+% rhocoreg=2000:100:4000;
+
+rcore=linspace(10000,470000,40);
+rhocoreg=linspace(rhomean,5000,40);
 
 [rhocorei,rcorei]=meshgrid(rhocoreg,rcore);
 
@@ -134,7 +137,6 @@ for i=1:Nconf
 end
 
 level_set1=[920 920];
-
 level_set2=[1000 1250 1500 1750 2000];
 
 [C,h]=contour(rcorei/1000,rhocorei,rhoouteri{ModelIn},level_set1,...
@@ -173,6 +175,57 @@ ylabel('Ice shell thickness[km]','FontSize',fntsize);
 
 legend({'SPG','SPC'},'FontSize',fntsize_sm);
 PrintWhite([fig_folder 'Fig_IceThickness.eps']);
+
+
+%% Non hydrostatic core
+
+% gi = ginput(1);
+% 
+% rcore_test = gi(1);
+% rho_core_test = gi(2);
+% rhoouter_test=-(3*M-4*pi*(rcore_test.^3).*rho_core_test)./...
+%     (4*pi*(rcore_test.^3)-4*pi*(router(2)^3));
+
+% [fp_noneq_test,fq_noneq_test,fval,exitflag]=...
+%     HydrostaticStateExact2lGridCoreNonEq(...
+%     router(2),rcore_test*1000,T,rhoouter_test,...
+%     rho_core_test,fpa_obs,fq_obs);
+
+tic
+[fp_noneq,fq_noneq,fval,exitflag]=...
+    HydrostaticStateExact2lGridCoreNonEq(...
+    router(2),rcorei,T,rhoouteri{2},rhocorei,fpa_obs,fq_obs);
+toc
+
+figure;
+set(gcf, 'Units','centimeters', 'Position',im_size)
+set(gcf, 'PaperPositionMode','auto')
+set(gca, 'FontSize',fntsize);
+hold on;box on;grid on;
+
+xlim([10 450]);
+ylim([rhomean 5000]);
+caxis([920 rhomean]);
+
+f_ratio = fp_noneq./fq_noneq;
+
+f_levels=0:0.1:1;
+pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
+[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq,f_levels,'-','Color','r','ShowText','on');
+[C2,h2] = contour(rcorei/1000,rhocorei,fq_noneq,f_levels,'-','Color','b','ShowText','on');
+contour(rcorei/1000,rhocorei,f_ratio,[1 1],'-k','LineWidth',3,'HandleVisibility','off');
+
+legend([h1 h2],{'1','2'});
+
+cbar=colorbar('FontSize',fntsize);
+ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
+
+
+xlabel('Core size [km]','FontSize',fntsize);
+ylabel('Core density [kg/m^3]','FontSize',fntsize);
+
+
+PrintWhite([fig_folder 'Fig_NonhydroCore.eps']);
 
 
 
