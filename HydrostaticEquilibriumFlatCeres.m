@@ -73,8 +73,8 @@ g=GM./(router.^2);
 % rcore=2500:500:470000;
 % rhocoreg=2000:100:4000;
 
-rcore=linspace(10000,470000,40);
-rhocoreg=linspace(rhomean,5000,40);
+rcore=linspace(10000,470000,100);
+rhocoreg=linspace(rhomean,5000,100);
 
 [rhocorei,rcorei]=meshgrid(rhocoreg,rcore);
 
@@ -169,9 +169,9 @@ for i=1:Nconf
     plot(rhoouter_h,(router(i)/1000-rcore_h),'-','LineWidth',3,'Color',ccmap(i,:));  
 end
 
-xlabel('Mantle density [kg/m^{3}]','FontSize',fntsize);
-ylabel('Ice shell thickness[km]','FontSize',fntsize);
-
+xlabel('Shell density [kg/m^{3}]','FontSize',fntsize);
+ylabel('Shell thickness[km]','FontSize',fntsize);
+xlim([800 rhomean])
 
 legend({'SPG','SPC'},'FontSize',fntsize_sm);
 PrintWhite([fig_folder 'Fig_IceThickness.eps']);
@@ -197,6 +197,12 @@ tic
     router(2),rcorei,T,rhoouteri{2},rhocorei,fpa_obs,fq_obs);
 toc
 
+% convergence conditions
+conv_cond = log10(fval) < 0;
+
+fq_noneq(~conv_cond)=NaN;
+fp_noneq(~conv_cond)=NaN;
+
 figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
@@ -209,13 +215,23 @@ caxis([920 rhomean]);
 
 f_ratio = fp_noneq./fq_noneq;
 
-f_levels=0:0.1:1;
+f_levels=0:0.025:1;
 pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
-[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq,f_levels,'-','Color','r','ShowText','on');
-[C2,h2] = contour(rcorei/1000,rhocorei,fq_noneq,f_levels,'-','Color','b','ShowText','on');
-contour(rcorei/1000,rhocorei,f_ratio,[1 1],'-k','LineWidth',3,'HandleVisibility','off');
+[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq-fouteri_n,f_levels,...
+    '-','Color','r','ShowText','on');
+h1_ = plot(NaN, '-r');
 
-legend([h1 h2],{'1','2'});
+[C2,h2] = contour(rcorei/1000,rhocorei,fq_noneq,f_levels,...
+    '-','Color','b','ShowText','on');
+h2_ = plot(NaN, '-b');
+
+contour(rcorei/1000,rhocorei,f_ratio,[1 1],'-k',...
+    'LineWidth',3,'HandleVisibility','off');
+h3_ = plot(NaN, '-k','LineWidth',3);
+
+
+legend([h1_ h2_,h3_],...
+    {'f_{p,core}','f_{q,core}','f_{q,core}=f_{p,core}'});
 
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
@@ -226,7 +242,6 @@ ylabel('Core density [kg/m^3]','FontSize',fntsize);
 
 
 PrintWhite([fig_folder 'Fig_NonhydroCore.eps']);
-
 
 
 %% Computing hydrostatic J2
