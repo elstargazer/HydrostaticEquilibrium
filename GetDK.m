@@ -10,7 +10,10 @@ kx = 2*x./(bot.*(a.*a+k));
 ky = 2*y./(bot.*(b.*b+k));
 kz = 2*z./(bot.*(c.*c+k));
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 % kxold = 2*x;
 % kyold = 2*y;
 % kzold = 2*z;

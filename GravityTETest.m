@@ -6,9 +6,15 @@ c=1;
 
 rho=1;
 
+<<<<<<< HEAD
 step = 0.0005;
 x=(0:step:3.5)+0.001;
 z=(0:step:3.5)+0.001;
+=======
+step = 0.0001;
+x=3.401:step:3.501;
+z=3.401:step:3.501;
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 
 [x,z] = meshgrid(x,z);
 y=0.001*z;
@@ -38,24 +44,37 @@ toc
 % axis equal
 
 figure; hold on;
+<<<<<<< HEAD
 quiver(x,z,ax,az,2,'Color','r');
 contour(x,z,U);
 plot(xell,zell,'-k');
 xlim([-3.5 3.5]);
 ylim([-3.5 3.5]);
 box on;
+=======
+contour(x,z,U);
+plot(xell,zell,'-k');
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 axis equal
 
 [fx,fz]=gradient(U,step,step);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 figure; hold on;
 quiver(x,z,fx,fz,'Color','b');
 quiver(x,z,ax,az,'Color','r');
 plot(xell,zell,'-k');
 axis equal
+<<<<<<< HEAD
 xlim([-3.5 3.5]);
 ylim([-3.5 3.5]);
+=======
+xlim([3.4 3.5]);
+ylim([3.4 3.5]);
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 
 dv=sqrt((ax-fx).^2+(az-fz).^2);
 amag=sqrt(ax.*ax+az.*az);
@@ -70,8 +89,13 @@ plot(xell,zell,'-k');
 axis equal
 caxis([-16 5]);
 colorbar
+<<<<<<< HEAD
 xlim([0 3.5]);
 ylim([0 3.5]);
+=======
+xlim([3.4 3.5]);
+ylim([3.4 3.5]);
+>>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 
 w = x.*x./a./a + z.*z./c./c;
 
