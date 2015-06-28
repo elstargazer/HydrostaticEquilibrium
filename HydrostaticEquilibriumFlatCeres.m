@@ -239,11 +239,14 @@ legend([h1_ h2_,h3_],...
     {'$\Delta f_{p,core}$','$\Delta f_{q,core}$','$f_{q,core}=f_{p,core}$'},...
     'FontSize',fntsize_sm,'Interpreter','latex');
 
+
+
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
 xlabel('Core size [km]','FontSize',fntsize);
 ylabel('Core density [kg/m^3]','FontSize',fntsize);
+
 
 PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
 
@@ -281,8 +284,46 @@ h2_ = plot(NaN, '-b');
 legend([h1_ h2_],...
     {'$J_{2}$','$C_{22}$'},'FontSize',fntsize_sm,'Interpreter','latex');
 
-
 PrintWhite([fig_folder 'Fig_GravityPrediction.jpg']);
+
+%% Computing J2 and C22 for non-hydrostatic core case
+
+Mcore = 4/3*pi.*(rcorei.^3).*(rhocorei-rhoouteri{2});
+Mouter = 4/3*pi.*(router(2).^3).*(rhoouteri{2});
+
+[J2outer,C22outer]=rf2j2c22(router(2),fq_obs,fp_obs,Rref);
+[J2core,C22core]=rf2j2c22(rcorei,fq_noneq,fp_noneq,Rref);
+
+J2 = (J2core.*Mcore+J2outer.*Mouter)./M;
+C22 = (C22core.*Mcore+C22outer.*Mouter)./M;
+
+figure;
+set(gcf, 'Units','centimeters', 'Position',im_size)
+set(gcf, 'PaperPositionMode','auto')
+set(gca, 'FontSize',fntsize);
+hold on;box on;grid on;
+
+xlim([10 450]);
+ylim([rhomean 5000]);
+caxis([920 rhomean]);
+
+pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
+
+[C1,h1] = contour(rcorei/1000,rhocorei,J2,20,...
+    '-','Color','r','ShowText','on');
+h1_ = plot(NaN, '-r');
+
+[C2,h2] = contour(rcorei/1000,rhocorei,C22,20,...
+    '-','Color','b','ShowText','on');
+h2_ = plot(NaN, '-b');
+
+legend([h1_ h2_],...
+    {'J_{2}','C_{22}'},'FontSize',fntsize_sm);
+
+figure
+pcolor(rcorei/1000,rhocorei,J2); shading interp;
+colorbar
+
 
 %% Computing hydrostatic J2
 % 
