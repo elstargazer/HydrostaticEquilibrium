@@ -141,7 +141,9 @@ level_set2=[1000 1250 1500 1750 2000];
 
 [C,h]=contour(rcorei/1000,rhocorei,rhoouteri{ModelIn},level_set1,'--',...
     'Color','k','LineWidth',1); 
-clabel(C,h,'manual','FontSize',fntsize_sm,'Color','k','EdgeColor','k','BackGroundColor','w');
+
+clabel(C,h,'manual','FontSize',fntsize_sm,...
+    'Color','k','EdgeColor','k','BackGroundColor','w');
  
 % [C,h]=contour(rcorei/1000,rhocorei,rhoouteri{ModelIn},level_set2,...
 %     'Color','c','LineWidth',4);
@@ -151,7 +153,7 @@ cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
 
-PrintWhite([fig_folder 'Fig_2layer.eps']);
+PrintWhite([fig_folder 'Fig_2layer.jpg']);
 
 %% Plot ice shell thickness
 figure;
@@ -165,16 +167,18 @@ for i=1:Nconf
     rcore_h=Chyd{i}(1,:);
     rhocore_h=Chyd{i}(2,:);
     
-    rhoouter_h=griddata(rcorei/1000,rhocorei,rhoouteri{i},rcore_h,rhocore_h,'linear');
-    plot(rhoouter_h,(router(i)/1000-rcore_h),'-','LineWidth',3,'Color',ccmap(i,:));  
+    rhoouter_h=griddata(rcorei/1000,rhocorei,...
+        rhoouteri{i},rcore_h,rhocore_h,'linear');
+    plot(rhoouter_h,(router(i)/1000-rcore_h),...
+        '-','LineWidth',3,'Color',ccmap(i,:));  
 end
 
 xlabel('Shell density [kg/m^{3}]','FontSize',fntsize);
-ylabel('Shell thickness[km]','FontSize',fntsize);
+ylabel('Shell thickness [km]','FontSize',fntsize);
 xlim([800 rhomean])
 
 legend({'SPG','SPC'},'FontSize',fntsize_sm);
-PrintWhite([fig_folder 'Fig_IceThickness.eps']);
+PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
 
 
 %% Non hydrostatic core
@@ -216,8 +220,10 @@ caxis([920 rhomean]);
 f_ratio = fp_noneq./fq_noneq;
 
 f_levels=0:0.1:1;
+
 pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
-[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq-fouteri_n,f_levels,...
+
+[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq,f_levels,...
     '-','Color','r','ShowText','on');
 h1_ = plot(NaN, '-r');
 
@@ -229,7 +235,6 @@ contour(rcorei/1000,rhocorei,f_ratio,[1 1],'-k',...
     'LineWidth',3,'HandleVisibility','off');
 h3_ = plot(NaN, '-k','LineWidth',3);
 
-
 legend([h1_ h2_,h3_],...
     {'$\Delta f_{p,core}$','$\Delta f_{q,core}$','$f_{q,core}=f_{p,core}$'},...
     'FontSize',fntsize_sm,'Interpreter','latex');
@@ -240,8 +245,7 @@ ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 xlabel('Core size [km]','FontSize',fntsize);
 ylabel('Core density [kg/m^3]','FontSize',fntsize);
 
-PrintWhite([fig_folder 'Fig_NonhydroCore.eps']);
-
+PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
 
 %% Computing J2 and C22 for non-hydrostatic core case
 
@@ -276,6 +280,9 @@ h2_ = plot(NaN, '-b');
 
 legend([h1_ h2_],...
     {'$J_{2}$','$C_{22}$'},'FontSize',fntsize_sm,'Interpreter','latex');
+
+
+PrintWhite([fig_folder 'Fig_GravityPrediction.jpg']);
 
 %% Computing hydrostatic J2
 % 
