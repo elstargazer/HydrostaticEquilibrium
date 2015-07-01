@@ -113,6 +113,11 @@ xlabel('Rotation period [h]','FontSize',fntsize);
 PrintWhite([fig_folder 'Fig_CeresHomo.jpg']);
 
 
+PrintWhite([fig_folder 'Fig_AllTopoSpec.jpg']);
+
+
+
+
 
 
 
