@@ -3,39 +3,15 @@ ccc;
 tic;
 %% Input parameters
 G=6.67384e-11;
-
 GM=62.68e9; % PCK version 0.2
 T=9.073859324514187; % DLR
-
 Rref=500000;
 
-% Equatorial semi-axis (km)   487.30  1.8
-% Polar semi-axis (km)        454.70  1.6
-
-% a=[487.3 479.7 483.4990 482.1130 482.7880];
-% c=[454.7 444.4 447.6 446.1255 447.8000];
-% sigmaa=[1.8 2.3 0.7 0 0];
-% sigmac=[1.6 2.1 0.4 0 0];
-
-a=[482.1130 482.7880];
-
+ell = [484.17 481.41 447.80]*1000;
+ell_err = [0.0 0.0 0.0];
 % OpNav5 JPL shape
-a3=484.17;
-b3=481.41;
-c3=447.80;
 
-fpa_obs=(a3-c3)/a3;
-fq_obs=(a3-b3)/a3;
-fpb_obs=(b3-c3)/b3;
-
-fp_obs=(sqrt(a3*b3)-c3)/sqrt(a3*b3);
-
-c=[446.1255 447.8000];
-sigmaa=[0.0 0.0];
-sigmac=[0.0 0.0];
-
-Nconf=numel(a);
-ModelIn=1;
+[fpa1_obs, fq1_obs, fp1_obs] = ell2f(ell);
 
 %% figure settings 
 
@@ -48,41 +24,39 @@ fig_folder='~/Dawn/Papers/CeresPaper1/';
 %% Preliminary conmutations
 
 M=GM/G;
+r1=prod(ell).^(1/3);
+% sigma_f1_obs=sqrt(...
+%     (c.*c.*sigmaa.*sigmaa+a.*a.*sigmac.*sigmac)./(c.^4));
 
-R=(a.*a.*c).^(1/3);
+sigma_fp1_obs = 0;
 
-V=1e9*4/3*pi*R.^3;
+% 1-outer
+% 2-core
 
-fouter_obs=(a-c)./a;
-sigma_fouter_obs=sqrt(...
-    (c.*c.*sigmaa.*sigmaa+a.*a.*sigmac.*sigmac)./(c.^4));
+V=4/3*pi*r1.^3;
 
-router=(V./(4/3*pi)).^(1/3);
-
-fcore0=0.1;
-fouter0=0.1;
+f10=0.1;
+f20=0.1;
 
 rhomean=M./V;
-
-% router=router(ModelIn);
-rhomean=rhomean(ModelIn);
-g=GM./(router.^2);
-% fouter_obs=fouter_obs(ModelIn);
+g=GM./(r1.^2);
 
 %% Grid of core radii and densities
 % rcore=2500:500:470000;
 % rhocoreg=2000:100:4000;
 
-rcore=linspace(10000,470000,100);
-rhocoreg=linspace(rhomean,5000,100);
+r2=linspace(10000,470000,100);
+rho2=linspace(rhomean,5000,100);
 
-[rhocorei,rcorei]=meshgrid(rhocoreg,rcore);
+[rho2i,r2i]=meshgrid(rho2,r2);
 
-for i=1:Nconf   
-    rhoouteri{i}=-(3*M-4*pi*(rcorei.^3).*rhocorei)./(4*pi*(rcorei.^3)-4*pi*(router(i)^3));
-    rhoouteri{i}(rhoouteri{i}<0)=NaN;  
-    [fcorei{i},fouteri{i}]=HydrostaticStateExact2lGrid(router(i),rcorei,T,rhoouteri{i},rhocorei);
-end
+rho1i=-(3*M-4*pi*(r2i.^3).*rho2i)./(4*pi*(r2i.^3)-4*pi*(r1^3));
+rho1i(rho1i<0)=NaN;
+
+
+%% Compute hydrostatic flattening factors
+
+[f2i,f1i]=HydrostaticStateExact2lGrid(r1,r2i,T,rho1i,rho2i); 
 
 %% Plotting settings
 
@@ -100,46 +74,36 @@ ylabel('Core density [kg/m^3]','FontSize',fntsize);
 
 %% Contour mantle density
 
-pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
+pcolor(r2i/1000,rho2i,rho1i); shading interp;
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
 caxis([920 rhomean]);
 plot(get(gca,'xlim'),[rhomean rhomean],'--k','LineWidth',3);
 
-%% Contour core flattening
 
-% levels=0:0.01:0.6;
-% [C,h]=contour(rcorei/1000,rhocorei,fcorei,levels,'Color',[0 1 0]);
-% text_handle = clabel(C,h);
-
-%% Contour outerflattening
-
-fouteri_n=fouteri{ModelIn};
-fouteri_n((fouteri_n<0) | isnan(rhoouteri{ModelIn}) )= NaN;
+%% Contour flattening
+f1i_n = f1i;
+f1i_n((f1i<0) | isnan(rho1i)) = NaN;
 
 levels=0.045:0.005:0.6;
-[C,h]=contour(rcorei/1000,rhocorei,fouteri_n,levels,'Color',...
+[C,h]=contour(r2i/1000,rho2i,f1i_n,levels,'Color',...
     [0.7 0.0 0.45],'LineWidth',2);
 
 clabel(C,h,'manual','FontSize',fntsize_sm,'Color','k','EdgeColor','k','BackGroundColor','w');
 
-ccmap=[1 0 0; 0 0 1];
+error_levels=[fp1_obs-sigma_fp1_obs fp1_obs+sigma_fp1_obs];
 
-for i=1:Nconf
-    
-    fouteri_n=fouteri{ModelIn};
-    fouteri_n((rhoouteri{ModelIn}<0) | isnan(rhoouteri{ModelIn}) )=NaN;
-    
-    levels=[fouter_obs(i)-sigma_fouter_obs(i) fouter_obs(i)+sigma_fouter_obs(i)];
-    [Chyd{i},h]=contour(rcorei/1000,rhocorei,fouteri_n,levels,'Color',ccmap(i,:),'LineWidth',5,...
-        'LineStyle','-');  
-end
+[Chyd,h]=contour(r2i/1000,rho2i,f1i_n,[fp1_obs fp1_obs],...
+    'Color','r','LineWidth',5,'LineStyle','-');
+
+[Chyd_err,h]=contour(r2i/1000,rho2i,f1i_n,error_levels,...
+    'Color','r','LineWidth',5,'LineStyle','-');
 
 level_set1=[920 920];
 level_set2=[1000 1250 1500 1750 2000];
 
-[C,h]=contour(rcorei/1000,rhocorei,rhoouteri{ModelIn},level_set1,'--',...
+[C,h]=contour(r2i/1000,rho2i,rho1i,level_set1,'--',...
     'Color','k','LineWidth',1); 
 
 clabel(C,h,'manual','FontSize',fntsize_sm,...
@@ -152,7 +116,6 @@ clabel(C,h,'manual','FontSize',fntsize_sm,...
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
-
 PrintWhite([fig_folder 'Fig_2layer.jpg']);
 
 %% Plot ice shell thickness
@@ -161,25 +124,20 @@ set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
 hold on;box on;grid on;
+   
+r2_h=Chyd(1,:)*1000;
+rho2_h=Chyd(2,:);
 
-for i=1:Nconf
-    
-    rcore_h=Chyd{i}(1,:);
-    rhocore_h=Chyd{i}(2,:);
-    
-    rhoouter_h=griddata(rcorei/1000,rhocorei,...
-        rhoouteri{i},rcore_h,rhocore_h,'linear');
-    plot(rhoouter_h,(router(i)/1000-rcore_h),...
-        '-','LineWidth',3,'Color',ccmap(i,:));  
-end
+rho1_h=griddata(r2i,rho2i,rho1i,r2_h,rho2_h,'linear');
+
+plot(rho1_h,r1-r2_h,'-','LineWidth',3,'Color','r')
 
 xlabel('Shell density [kg/m^{3}]','FontSize',fntsize);
 ylabel('Shell thickness [km]','FontSize',fntsize);
 xlim([800 rhomean])
 
-legend({'SPG','SPC'},'FontSize',fntsize_sm);
+% legend({'SPG','SPC'},'FontSize',fntsize_sm);
 PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
-
 
 %% Non hydrostatic core
 
@@ -198,7 +156,7 @@ PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
 tic
 [fp_noneq,fq_noneq,fval,exitflag]=...
     HydrostaticStateExact2lGridCoreNonEq(...
-    router(2),rcorei,T,rhoouteri{2},rhocorei,fpa_obs,fq_obs);
+    r1,r2i,T,rho1i,rho2i,fpa1_obs,fq1_obs);
 toc
 
 % convergence conditions
@@ -218,20 +176,19 @@ ylim([rhomean 5000]);
 caxis([920 rhomean]);
 
 f_ratio = fp_noneq./fq_noneq;
-
 f_levels=0:0.1:1;
 
-pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
+pcolor(r2i/1000,rho2i,rho1i); shading interp;
 
-[C1,h1] = contour(rcorei/1000,rhocorei,fp_noneq,f_levels,...
+contour(r2i/1000,rho2i,fp_noneq,f_levels,...
     '-','Color','r','ShowText','on');
 h1_ = plot(NaN, '-r');
 
-[C2,h2] = contour(rcorei/1000,rhocorei,fq_noneq,f_levels,...
+contour(r2i/1000,rho2i,fq_noneq,f_levels,...
     '-','Color','b','ShowText','on');
 h2_ = plot(NaN, '-b');
 
-contour(rcorei/1000,rhocorei,f_ratio,[1 1],'-k',...
+contour(r2i/1000,rho2i,f_ratio,[1 1],'-k',...
     'LineWidth',3,'HandleVisibility','off');
 h3_ = plot(NaN, '-k','LineWidth',3);
 
@@ -239,91 +196,49 @@ legend([h1_ h2_,h3_],...
     {'$\Delta f_{p,core}$','$\Delta f_{q,core}$','$f_{q,core}=f_{p,core}$'},...
     'FontSize',fntsize_sm,'Interpreter','latex');
 
-
-
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 
 xlabel('Core size [km]','FontSize',fntsize);
 ylabel('Core density [kg/m^3]','FontSize',fntsize);
 
-
 PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
 
 %% Computing J2 and C22 for non-hydrostatic core case
 
-Mcore = 4/3*pi.*(rcorei.^3).*(rhocorei-rhoouteri{2});
-Mouter = 4/3*pi.*(router(2).^3).*(rhoouteri{2});
+M2 = 4/3*pi.*(r2i.^3).*(rho2i-rho1i);
+M1 = 4/3*pi.*(r1.^3).*(rho1i);
 
-[J2outer,C22outer]=rf2j2c22(router(2),fq_obs,fp_obs,Rref);
-[J2core,C22core]=rf2j2c22(rcorei,fq_noneq,fp_noneq,Rref);
+[J2_1,C22_1]=rf2j2c22(r1,fq1_obs,fpa1_obs,Rref);
+[J2_2,C22_2]=rf2j2c22(r2i,fq_noneq,fp_noneq,Rref);
 
-J2 = (J2core.*Mcore+J2outer.*Mouter)./M;
-C22 = (C22core.*Mcore+C22outer.*Mouter)./M;
+J2 = (J2_2.*M2+J2_1.*M1)./M;
+C22 = (C22_2.*M2+C22_1.*M1)./M;
 
 figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
-hold on;box on;grid on;
+hold on; box on;grid on;
 
 xlim([10 450]);
 ylim([rhomean 5000]);
 caxis([920 rhomean]);
 
-pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
+pcolor(r2i/1000,rho2i,rho1i); shading interp;
 
-[C1,h1] = contour(rcorei/1000,rhocorei,J2,20,...
-    '-','Color','r','ShowText','on');
+levels = 0:0.00001:max(J2(:));
+contour(r2i/1000,rho2i,J2,levels,'-','Color','r','ShowText','on');
 h1_ = plot(NaN, '-r');
 
-[C2,h2] = contour(rcorei/1000,rhocorei,C22,20,...
-    '-','Color','b','ShowText','on');
+levels = 0:0.00001:max(C22(:));
+contour(r2i/1000,rho2i,C22,levels,'-','Color','b','ShowText','on');
 h2_ = plot(NaN, '-b');
 
 legend([h1_ h2_],...
     {'$J_{2}$','$C_{22}$'},'FontSize',fntsize_sm,'Interpreter','latex');
 
 PrintWhite([fig_folder 'Fig_GravityPrediction.jpg']);
-
-%% Computing J2 and C22 for non-hydrostatic core case
-
-Mcore = 4/3*pi.*(rcorei.^3).*(rhocorei-rhoouteri{2});
-Mouter = 4/3*pi.*(router(2).^3).*(rhoouteri{2});
-
-[J2outer,C22outer]=rf2j2c22(router(2),fq_obs,fp_obs,Rref);
-[J2core,C22core]=rf2j2c22(rcorei,fq_noneq,fp_noneq,Rref);
-
-J2 = (J2core.*Mcore+J2outer.*Mouter)./M;
-C22 = (C22core.*Mcore+C22outer.*Mouter)./M;
-
-figure;
-set(gcf, 'Units','centimeters', 'Position',im_size)
-set(gcf, 'PaperPositionMode','auto')
-set(gca, 'FontSize',fntsize);
-hold on;box on;grid on;
-
-xlim([10 450]);
-ylim([rhomean 5000]);
-caxis([920 rhomean]);
-
-pcolor(rcorei/1000,rhocorei,rhoouteri{ModelIn}); shading interp;
-
-[C1,h1] = contour(rcorei/1000,rhocorei,J2,20,...
-    '-','Color','r','ShowText','on');
-h1_ = plot(NaN, '-r');
-
-[C2,h2] = contour(rcorei/1000,rhocorei,C22,20,...
-    '-','Color','b','ShowText','on');
-h2_ = plot(NaN, '-b');
-
-legend([h1_ h2_],...
-    {'J_{2}','C_{22}'},'FontSize',fntsize_sm);
-
-figure
-pcolor(rcorei/1000,rhocorei,J2); shading interp;
-colorbar
-
 
 %% Computing hydrostatic J2
 % 
