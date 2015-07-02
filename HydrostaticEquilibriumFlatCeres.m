@@ -9,6 +9,7 @@ Rref=500000;
 
 ell = [484.17 481.41 447.80]*1000;
 ell_err = [0.0 0.0 0.0];
+offset = 890;
 % OpNav5 JPL shape
 
 [fpa1_obs, fq1_obs, fp1_obs] = ell2f(ell);
@@ -119,25 +120,54 @@ ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
 PrintWhite([fig_folder 'Fig_2layer.jpg']);
 
 %% Plot ice shell thickness
+
+M2 = 4/3*pi.*(r2i.^3).*(rho2i-rho1i);
+M1 = 4/3*pi.*(r1.^3).*(rho1i);
+
 figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
-hold on;box on;grid on;
-   
+hold on;grid on;
+
+ax1 = gca; % current axes
+ax1.XColor = 'k';
+ax1.YColor = 'k';
+
 r2_h=Chyd(1,:)*1000;
 rho2_h=Chyd(2,:);
 
 rho1_h=griddata(r2i,rho2i,rho1i,r2_h,rho2_h,'linear');
+M2_h=griddata(r2i,rho2i,M2,r2_h,rho2_h,'linear');
 
-plot(rho1_h,r1-r2_h,'-','LineWidth',3,'Color','r')
+offset_core = M./M2_h*offset;
+
+pl_shell=plot(ax1,rho1_h,(r1-r2_h)/1000,'-','LineWidth',3,'Color','r')
 
 xlabel('Shell density [kg/m^{3}]','FontSize',fntsize);
 ylabel('Shell thickness [km]','FontSize',fntsize);
 xlim([800 rhomean])
 
+
+ax1_pos = ax1.Position; % position of first axes
+ax2 = axes('Position',ax1_pos,...
+    'XAxisLocation','top',...
+    'YAxisLocation','right',...
+    'Color','none','FontSize',fntsize); 
+hold on;
+
+pl_offset=plot(ax2,rho1_h,offset_core/1000,'-','LineWidth',3,'Color','b');
+
+ylabel('Core offset [km]','FontSize',fntsize);
+xlim([800 rhomean])
+
+legend([pl_shell pl_offset],...
+    {'Shell Thickness [km]','Core offset [km]'},...
+    'FontSize',fntsize_sm);
+
 % legend({'SPG','SPC'},'FontSize',fntsize_sm);
 PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
+
 
 %% Non hydrostatic core
 
@@ -205,9 +235,6 @@ ylabel('Core density [kg/m^3]','FontSize',fntsize);
 PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
 
 %% Computing J2 and C22 for non-hydrostatic core case
-
-M2 = 4/3*pi.*(r2i.^3).*(rho2i-rho1i);
-M1 = 4/3*pi.*(r1.^3).*(rho1i);
 
 [J2_1,C22_1]=rf2j2c22(r1,fq1_obs,fpa1_obs,Rref);
 [J2_2,C22_2]=rf2j2c22(r2i,fq_noneq,fp_noneq,Rref);
