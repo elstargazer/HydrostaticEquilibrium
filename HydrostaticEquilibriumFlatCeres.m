@@ -73,8 +73,8 @@ g=GM./(router.^2);
 % rcore=2500:500:470000;
 % rhocoreg=2000:100:4000;
 
-rcore=linspace(10000,470000,40);
-rhocoreg=linspace(rhomean,5000,40);
+rcore=linspace(10000,470000,100);
+rhocoreg=linspace(rhomean,5000,100);
 
 [rhocorei,rcorei]=meshgrid(rhocoreg,rcore);
 
