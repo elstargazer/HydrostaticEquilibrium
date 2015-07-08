@@ -4,33 +4,11 @@ function [fp2,fq2,fval,exitflag]=...
 
 progressbar(0)
 
-<<<<<<< HEAD
-for i=1:numel(rhocorei)
-    
-=======
 parfor i=1:numel(rhocorei)   
->>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
+
     if (rhoouteri(i)>0)
 
-        [fhi(i,:),fval(i),exitflag(i)]=...
-            HydrostaticStateExact2lCoreNonEq(...
-<<<<<<< HEAD
-            router,rcorei(i),T,rhoouteri(i),rhocorei(i),fp1,fq1,0.1,0.05);
-        
-%         PlotPot2El(router,rcore,...
-%             fp1,fq1,fhi(i,1),fhi(i,2),rhoouteri(i),rhocorei(i),W);
-        
-        
-%         fouter0=fhi(i,1);
-%         fcore0=fhi(i,2);      
-    else
-        fhi(i,:)=[NaN NaN]; 
-        fval(i)=NaN;
-        exitflag(i)=NaN;
-    end 
-%      progressbar(i/numel(rhocorei));
-%      i/numel(rhocorei)
-=======
+        [fhi(i,:),fval(i),exitflag(i)]=HydrostaticStateExact2lCoreNonEq(...
             router,rcorei(i),T,rhoouteri(i),rhocorei(i),fp1,fq1,0.1,0.05);     
     else
         fhi(i,:) = [NaN NaN]; 
@@ -38,7 +16,6 @@ parfor i=1:numel(rhocorei)
         exitflag(i) = NaN;
     end 
      % progressbar(i/numel(rhocorei));
->>>>>>> 3a0ebf8cff0cd8c2f9067f3e09b40bc6954ce854
 end
 
 progressbar(1);
