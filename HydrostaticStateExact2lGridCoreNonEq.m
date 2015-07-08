@@ -8,8 +8,10 @@ parfor i=1:numel(rhocorei)
 
     if (rhoouteri(i)>0)
 
-        [fhi(i,:),fval(i),exitflag(i)]=HydrostaticStateExact2lCoreNonEq(...
-            router,rcorei(i),T,rhoouteri(i),rhocorei(i),fp1,fq1,0.1,0.05);     
+        
+        [fhi(i,:),fval(i),exitflag(i)]=...
+            HydrostaticStateExact2lCoreNonEq(...
+            router,rcorei(i),T,rhoouteri(i),rhocorei(i),fp1,fq1);     
     else
         fhi(i,:) = [NaN NaN]; 
         fval(i) = NaN;
