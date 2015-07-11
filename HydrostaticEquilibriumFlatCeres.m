@@ -5,11 +5,12 @@ tic;
 G=6.67384e-11;
 GM=62.68e9; % PCK version 0.2
 T=9.073859324514187; % DLR
-Rref=500000;
+Rref=476000;
 
 ell = [484.17 481.41 447.80]*1000;
 ell_err = [0.0 0.0 0.0];
-offset = 890;
+J2obs = 1.14e-2;
+offset = 722;
 % OpNav5 JPL shape
 
 [fpa1_obs, fq1_obs, fp1_obs] = ell2f(ell);
@@ -61,7 +62,7 @@ rho1i(rho1i<0)=NaN;
 
 %% Plotting settings
 
-figure;
+fig_2l=figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
@@ -124,7 +125,7 @@ PrintWhite([fig_folder 'Fig_2layer.jpg']);
 M2 = 4/3*pi.*(r2i.^3).*(rho2i-rho1i);
 M1 = 4/3*pi.*(r1.^3).*(rho1i);
 
-figure;
+fig_shell=figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
@@ -142,12 +143,11 @@ M2_h=griddata(r2i,rho2i,M2,r2_h,rho2_h,'linear');
 
 offset_core = M./M2_h*offset;
 
-pl_shell=plot(ax1,rho1_h,(r1-r2_h)/1000,'-','LineWidth',3,'Color','r')
+pl_shell=plot(ax1,rho1_h,(r1-r2_h)/1000,'-','LineWidth',3,'Color','r');
 
 xlabel('Shell density [kg/m^{3}]','FontSize',fntsize);
 ylabel('Shell thickness [km]','FontSize',fntsize);
 xlim([800 rhomean])
-
 
 ax1_pos = ax1.Position; % position of first axes
 ax2 = axes('Position',ax1_pos,...
@@ -168,7 +168,6 @@ legend([pl_shell pl_offset],...
 % legend({'SPG','SPC'},'FontSize',fntsize_sm);
 PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
 
-
 %% Non hydrostatic core
 
 % gi = ginput(1);
@@ -183,182 +182,161 @@ PrintWhite([fig_folder 'Fig_IceThickness.jpg']);
 %     router(2),rcore_test*1000,T,rhoouter_test,...
 %     rho_core_test,fpa_obs,fq_obs);
 
-tic
-[fp_noneq,fq_noneq,fval,exitflag]=...
-    HydrostaticStateExact2lGridCoreNonEq(...
-    r1,r2i,T,rho1i,rho2i,fpa1_obs,fq1_obs);
-toc
+% tic
+% [fp_noneq,fq_noneq,fval,exitflag]=...
+%     HydrostaticStateExact2lGridCoreNonEq(...
+%     r1,r2i,T,rho1i,rho2i,fpa1_obs,fq1_obs);
+% toc
 
 % convergence conditions
-conv_cond = log10(fval) < 0;
-
-fq_noneq(~conv_cond)=NaN;
-fp_noneq(~conv_cond)=NaN;
-
-figure;
-set(gcf, 'Units','centimeters', 'Position',im_size)
-set(gcf, 'PaperPositionMode','auto')
-set(gca, 'FontSize',fntsize);
-hold on;box on;grid on;
-
-xlim([10 450]);
-ylim([rhomean 5000]);
-caxis([920 rhomean]);
-
-f_ratio = fp_noneq./fq_noneq;
-f_levels=0:0.1:1;
-
-pcolor(r2i/1000,rho2i,rho1i); shading interp;
-
-contour(r2i/1000,rho2i,fp_noneq,f_levels,...
-    '-','Color','r','ShowText','on');
-h1_ = plot(NaN, '-r');
-
-contour(r2i/1000,rho2i,fq_noneq,f_levels,...
-    '-','Color','b','ShowText','on');
-h2_ = plot(NaN, '-b');
-
-contour(r2i/1000,rho2i,f_ratio,[1 1],'-k',...
-    'LineWidth',3,'HandleVisibility','off');
-h3_ = plot(NaN, '-k','LineWidth',3);
-
-legend([h1_ h2_,h3_],...
-    {'$\Delta f_{p,core}$','$\Delta f_{q,core}$','$f_{q,core}=f_{p,core}$'},...
-    'FontSize',fntsize_sm,'Interpreter','latex');
-
-cbar=colorbar('FontSize',fntsize);
-ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
-
-xlabel('Core size [km]','FontSize',fntsize);
-ylabel('Core density [kg/m^3]','FontSize',fntsize);
-
-PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
+% conv_cond = log10(fval) < 0;
+% 
+% fq_noneq(~conv_cond)=NaN;
+% fp_noneq(~conv_cond)=NaN;
+% 
+% figure;
+% set(gcf, 'Units','centimeters', 'Position',im_size)
+% set(gcf, 'PaperPositionMode','auto')
+% set(gca, 'FontSize',fntsize);
+% hold on;box on;grid on;
+% 
+% xlim([10 450]);
+% ylim([rhomean 5000]);
+% caxis([920 rhomean]);
+% 
+% f_ratio = fp_noneq./fq_noneq;
+% f_levels=0:0.1:1;
+% 
+% pcolor(r2i/1000,rho2i,rho1i); shading interp;
+% 
+% contour(r2i/1000,rho2i,fp_noneq,f_levels,...
+%     '-','Color','r','ShowText','on');
+% h1_ = plot(NaN, '-r');
+% 
+% contour(r2i/1000,rho2i,fq_noneq,f_levels,...
+%     '-','Color','b','ShowText','on');
+% h2_ = plot(NaN, '-b');
+% 
+% contour(r2i/1000,rho2i,f_ratio,[1 1],'-k',...
+%     'LineWidth',3,'HandleVisibility','off');
+% h3_ = plot(NaN, '-k','LineWidth',3);
+% 
+% legend([h1_ h2_,h3_],...
+%     {'$\Delta f_{p,core}$','$\Delta f_{q,core}$','$f_{q,core}=f_{p,core}$'},...
+%     'FontSize',fntsize_sm,'Interpreter','latex');
+% 
+% cbar=colorbar('FontSize',fntsize);
+% ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
+% 
+% xlabel('Core size [km]','FontSize',fntsize);
+% ylabel('Core density [kg/m^3]','FontSize',fntsize);
+% 
+% PrintWhite([fig_folder 'Fig_NonhydroCore.jpg']);
 
 %% Computing J2 and C22 for non-hydrostatic core case
+% 
+% [J2_1,C22_1]=rf2j2c22(r1,fq1_obs,fpa1_obs,Rref);
+% [J2_2,C22_2]=rf2j2c22(r2i,fq_noneq,fp_noneq,Rref);
+% 
+% J2 = (J2_2.*M2+J2_1.*M1)./M;
+% C22 = (C22_2.*M2+C22_1.*M1)./M;
+% 
+% figure;
+% set(gcf, 'Units','centimeters', 'Position',im_size)
+% set(gcf, 'PaperPositionMode','auto')
+% set(gca, 'FontSize',fntsize);
+% hold on; box on;grid on;
+% 
+% xlim([10 450]);
+% ylim([rhomean 5000]);
+% caxis([920 rhomean]);
+% 
+% pcolor(r2i/1000,rho2i,rho1i); shading interp;
+% 
+% levels = 0:0.00001:max(J2(:));
+% contour(r2i/1000,rho2i,J2,levels,'-','Color','r','ShowText','on');
+% h1_ = plot(NaN, '-r');
+% 
+% levels = 0:0.00001:max(C22(:));
+% contour(r2i/1000,rho2i,C22,levels,'-','Color','b','ShowText','on');
+% h2_ = plot(NaN, '-b');
+% 
+% legend([h1_ h2_],...
+%     {'$J_{2}$','$C_{22}$'},'FontSize',fntsize_sm,'Interpreter','latex');
+% 
+% PrintWhite([fig_folder 'Fig_GravityPrediction.jpg']);
 
-[J2_1,C22_1]=rf2j2c22(r1,fq1_obs,fpa1_obs,Rref);
-[J2_2,C22_2]=rf2j2c22(r2i,fq_noneq,fp_noneq,Rref);
+%% Computing hydrostatic J2
 
-J2 = (J2_2.*M2+J2_1.*M1)./M;
-C22 = (C22_2.*M2+C22_1.*M1)./M;
+J2hi=RadFlat2J2(r1,r2i,f1i,f2i,rho1i,rho2i,Rref);
 
-figure;
+%nmax=10;
+% J=HydroCoeffs2Layer(router,rcorei,fouteri,fcorei,rhoouteri,rhocorei,Rref,nmax);
+figure(fig_2l);
+
+levels=0:10e-4:0.04;
+[C,h]=contour(r2i/1000,rho2i,J2hi,levels,'Color','m','LineStyle','-','LineWidth',2);
+
+clabel(C,h,'manual','FontSize',12,'Color','k','EdgeColor','k','BackGroundColor','w');
+
+[CJhyd,h]=contour(r2i/1000,rho2i,J2hi,[J2obs J2obs],'Color','m','LineStyle','-','LineWidth',2);
+
+r2_Jh=CJhyd(1,:)*1000;
+rho2_Jh=CJhyd(2,:);
+
+rho1_Jh=griddata(r2i,rho2i,rho1i,r2_Jh,rho2_Jh,'linear');
+M2_Jh=griddata(r2i,rho2i,M2,r2_Jh,rho2_Jh,'linear');
+
+figure(fig_shell);
+
+pl_Jshell=plot(ax1,rho1_Jh,(r1-r2_Jh)/1000,'--','LineWidth',3,'Color','r');
+
+legend([pl_shell pl_offset pl_Jshell],...
+    {'Shell Thickness from shape [km]','Core offset [km]','Shell Thickness from gravity'},...
+    'FontSize',fntsize_sm);
+%% Computing C/MR^2
+
+[a1,c1]=f2axes(r1,f1i);
+[a2,c2]=f2axes(r2i,f2i);
+
+Ch1=0.2*(M1).*(a1.^2+c1.^2);
+Ch2=0.2*(M2).*(a2.^2+c2.^2);
+
+Ch=Ch1+Ch2;
+
+lambdah=Ch./(M.*r1.^2);
+
+figure(fig_2l);
+
+levels=-0.5:0.02:0.6666;
+[C_I,h]=contour(r2i/1000,rho2i,lambdah,levels,...
+    'Color','g','LineWidth',2);
+
+clabel(C,h,'manual','FontSize',fntsize_sm,...
+    'Color','k','EdgeColor','k','BackGroundColor','w');
+
+lambda_J=griddata(r2i,rho2i,lambdah,r2_Jh,rho2_Jh,'linear');
+lambda_f=griddata(r2i,rho2i,lambdah,r2_h,rho2_h,'linear');
+
+fig_lambda=figure;
 set(gcf, 'Units','centimeters', 'Position',im_size)
 set(gcf, 'PaperPositionMode','auto')
 set(gca, 'FontSize',fntsize);
-hold on; box on;grid on;
+hold on;grid on; box on;
 
-xlim([10 450]);
-ylim([rhomean 5000]);
-caxis([920 rhomean]);
+pl_lambdaJ=plot(r2_Jh/1000,lambda_J,'-','LineWidth',3,'Color','r');
+pl_lambdaf=plot(r2_h/1000,lambda_f,'-','LineWidth',3,'Color','b');
 
-pcolor(r2i/1000,rho2i,rho1i); shading interp;
+xlabel('Core size [km]','FontSize',fntsize);
+ylabel('\lambda','FontSize',fntsize);
 
-levels = 0:0.00001:max(J2(:));
-contour(r2i/1000,rho2i,J2,levels,'-','Color','r','ShowText','on');
-h1_ = plot(NaN, '-r');
-
-levels = 0:0.00001:max(C22(:));
-contour(r2i/1000,rho2i,C22,levels,'-','Color','b','ShowText','on');
-h2_ = plot(NaN, '-b');
-
-legend([h1_ h2_],...
-    {'$J_{2}$','$C_{22}$'},'FontSize',fntsize_sm,'Interpreter','latex');
-
-PrintWhite([fig_folder 'Fig_GravityPrediction.jpg']);
-
-%% Computing hydrostatic J2
-% 
-% J2hi=RadFlat2J2(router,rcorei,fouteri,fcorei,rhoouteri,rhocorei,Rref);
-% 
-% %nmax=10;
-% % J=HydroCoeffs2Layer(router,rcorei,fouteri,fcorei,rhoouteri,rhocorei,Rref,nmax);
-% 
-% 
-% levels=0:10e-4:0.04;
-% [C,h]=contour(rcorei/1000,rhocorei,J2hi,levels,'Color','m','LineStyle','-','LineWidth',2);
-% 
-% clabel(C,h,'manual','FontSize',12,'Color','k','EdgeColor','k','BackGroundColor','w');
-% 
-% % dawn J2 mine
-% J2_4=griddata(rcorei/1000,rhocorei,J2hi,C4(1,:),C4(2,:),'cubic');
-% J2_4_min=min(J2_4);
-% J2_4_max=max(J2_4);
-% 
-% [J2_4_min J2_4_max]
+legend([pl_lambdaJ pl_lambdaf],...
+    {'$\lambda_{J}$','$\lambda_{f}$'},...
+    'FontSize',fntsize_sm,'interpreter','latex');
 
 
-% [C,h]=contour(rcorei/1000,rhocorei,J2hi,'Color',[0 1 1],'LineStyle','-','LineWidth',2);
-
-% nc=50;
-% mc=30;
-% 
-% for i=1:size(J,3)
-%     Jslice(i)=J(nc,mc,i);
-% end
-% 
-% figure; hold on;
-% set(gca,'FontSize',20,'YScale','log');
-% 
-% 
-% plot(2:2:nmax,Jslice,'-o','LineWidth',3,'MarkerSize',6);
-% 
-% xlabel('Degree','FontSize',20);
-% ylabel('J_{2n} ','FontSize',20);
-% 
-% 
-% for i=1:size(rhocorei,1)
-%     for j=1:size(rhocorei,2)
-%         
-%         for k=1:size(J,3)
-%             Jslice(k)=J(i,j,k);
-%         end
-%         
-%         p=polyfit(2:2:nmax,Jslice,1);
-%         
-%         pe(i,j)=p(1);
-%         
-%     end   
-% end
 
 
-% 
-% figure; hold on;
-% set(gca,'FontSize',20);
-% pcolor(rcorei/1000,rhocorei,J(:,:,1)); shading interp;
-% colorbar('FontSize',20);
-% 
-% 
-% xlabel('Core size [km] ','FontSize',12);
-% ylabel('Core density [kg/m^3] ','FontSize',12);
-
-
-%% Computing C/MR^2
-% 
-% [a1,c1]=f2axes(router,fouteri);
-% [a2,c2]=f2axes(rcorei,fcorei);
-% 
-% M1=4/3*pi*rhoouteri*router.^3;
-% M2=4/3*pi*(rhocorei-rhoouteri).*rcorei.^3;
-% 
-% Mt=M1+M2;
-% 
-% Ch1=0.2*(M1).*(a1.^2+c1.^2);
-% Ch2=0.2*(M2).*(a2.^2+c2.^2);
-% 
-% Ch=Ch1+Ch2;
-% 
-% lambdah=Ch./(Mt.*router.^2);
-% 
-% levels=-0.5:0.02:0.6666;
-% [C,h]=contour(rcorei/1000,rhocorei,lambdah,levels,'Color','g','LineWidth',2);
-% 
-% clabel(C,h,'manual','FontSize',fntsize_sm,'Color','k','EdgeColor','k','BackGroundColor','w');
-% 
-% print(gcf, '-dpsc', 'Ceres2Layer.eps');
-% 
-% 
-% toc
 
 
 
