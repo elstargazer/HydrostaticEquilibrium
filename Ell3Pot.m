@@ -2,7 +2,7 @@ function U=Ell3Pot(a,b,c,x,y,z,rho)
 
 w=IsInEllipsoid(a,b,c,x,y,z);
 
-G   = 6.67e-11;
+G   = 6.67384e-11;
 eps = 1e-12;
 
 if (c>b)
