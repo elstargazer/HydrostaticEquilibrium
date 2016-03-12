@@ -1,21 +1,18 @@
-function [fcorei,fouteri]=HydrostaticStateExact2lGrid(router,rcorei,T,rhoouteri,rhocorei)
+function [fcorei,fouteri]=HydrostaticStateExact2lGrid...
+    (router,rcorei,T,rhoouteri,rhocorei)
 
 progressbar(0)
 
 parfor i=1:numel(rhocorei)   
-    if (rhoouteri(i)>0)
-
-        [fhi(i,:),fval]=HydrostaticStateExact2l(router,rcorei(i),T,...
-            rhoouteri(i),rhocorei(i),0.1,0.1);
-        %[fhi(i,:)]=HydrostaticState2LayerAn(rcorei(i),router,T,rhocorei(i),rhoouteri(i),0.1,0.1,1);
+    if (rhoouteri(i)>0 && (rhoouteri(i)~=Inf))
         
-%         fouter0=fhi(i,1);
-%         fcore0=fhi(i,2);      
+        [rcorei(i) rhoouteri(i),rhocorei(i)]
+        [fhi(i,:),~]=HydrostaticStateExact2l(router,rcorei(i),T,...
+            rhoouteri(i),rhocorei(i),0.1,0.1);    
     else
         fhi(i,:)=[NaN NaN];       
-    end
-    
-    %progressbar(i/numel(rhocorei));
+    end  
+%     progressbar(i/numel(rhocorei));
 end
 
 progressbar(1);
