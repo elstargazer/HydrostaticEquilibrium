@@ -10,11 +10,9 @@ ell = [484.17 481.41 447.80];
 [fap_obs, fq_obs,fabp_obs] = ell2f(ell);
 fbp_obs = (ell(2)-ell(3))/ell(2);
 
-
 fntsize = 12;
 fntsize_sm = 8;
 im_size=[0 0 13 9];
-
 
 fig_folder='~/Dawn/Papers/CeresPaper1/';
 %% Preliminary computations
@@ -59,8 +57,8 @@ ylabel('Outer flattening []','FontSize',fntsize);
 
 %% Pre-Dawn shapes
 
-fp = [546, 644, 601, 542, 915, 897, 380, 669, 736]/10000;
-fp_err = [103, 62, 550, 454, 184, 174, 158, 45, 62]/10000;
+fp = [546, 644, 601, 542, 915, 897, 380, 669, 736, 776]/10000;
+fp_err = [103, 62, 550, 454, 184, 174, 158, 45, 62, 141]/10000;
 
 ccj=jet(numel(fp));
 
@@ -99,6 +97,7 @@ legend([phomo p_ p_fill],...
     'Parker et al. 2002',...
     'Thomas et al. 2005',...
     'Carry et al. 2008',...
+    'Drummond et al. 2014',...
     'Dawn'},...
     'FontSize',fntsize_sm,...
     'interpreter','latex','boxoff')
@@ -110,10 +109,7 @@ set(gca,'xaxisLocation','top')
 %     'FontSize',fntsize);
 xlabel('Rotation period [h]','FontSize',fntsize);
 
-PrintWhite([fig_folder 'Fig_CeresHomo.jpg']);
-
-
-PrintWhite([fig_folder 'Fig_AllTopoSpec.jpg']);
+PrintWhite([fig_folder 'Fig_CeresHomo_mod.jpg']);
 
 
 
