@@ -17,6 +17,6 @@ U=U+RotPot(x,y,W);
 
 % Tidal potential
 
-% U=U+TidalPot(x,y,z,W);
+U=U+TidalPot(x,y,z,W);
 
 
