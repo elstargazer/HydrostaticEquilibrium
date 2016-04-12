@@ -5,8 +5,8 @@ if (isnan(rho1) || isnan(rho2) || (rho1<0) || (rho2<0))
     return
 end
 
-tol_in=1e-8;
-tol_out=1e-3;
+tol_in=1e-9;
+tol_out=1e-4;
 
 itermax_in=100;
 itermax_out=100;
@@ -247,6 +247,7 @@ switch Order
             iter_out=iter_out+1;
             
             if (iter_out>itermax_out);
+                disp('read max iterations');
                 break
             end  
         end

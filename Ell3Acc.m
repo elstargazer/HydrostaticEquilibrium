@@ -131,6 +131,6 @@ else
      ay=DADy .* F + DFDy .* A + DBDy .* E + B .* DEDy + DCDy .* D + C .* DDDytot;
      az=0         + DFDz .* A + DBDz .* E + B .* DEDz + DCDz .* D + C .* DDDztot;   
 end
-% ax = pi*G*rho*ax;
-% ay = pi*G*rho*ay;
-% az = pi*G*rho*az;
+ax = pi*G*rho*ax;
+ay = pi*G*rho*ay;
+az = pi*G*rho*az;
