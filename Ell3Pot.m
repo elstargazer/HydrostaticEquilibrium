@@ -15,7 +15,6 @@ else
         k=GetK(a,b,c,x,y,z);
     end
     
-    
     % [a a c x y z w]
     
     psi=asin(sqrt((a*a-c*c)/(a*a+k)));
