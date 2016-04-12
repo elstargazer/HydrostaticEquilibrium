@@ -1,4 +1,4 @@
-function H_eq = Height2Equipotential(filename,lat_grid,lon_grid,mu,Rref,lmcosi_g,T)
+function [H_eq,r_eq] = Height2Equipotential(filename,lat_grid,lon_grid,mu,Rref,lmcosi_g,T)
 
 w = 2*pi./(3600*T);
 step = (lon_grid(end) - lon_grid(end-1))*180/pi;
@@ -9,6 +9,7 @@ Npts = 1000;
 x_rand = x_rand * 1000;
 y_rand = y_rand * 1000;
 z_rand = z_rand * 1000;
+
 [lon_rand, lat_rand, r_rand] = cart2sph(x_rand,y_rand,z_rand);
 r_mean = mean(r_rand);
 g_approx = mu/(r_mean^2);
@@ -62,7 +63,7 @@ while (eps > tol)
     dr   = (U_tot - U_mean)/g_approx;
     r_eq = r_eq + dr;
     [x_eq,y_eq,z_eq] = sph2cart(lon_grid, lat_grid,r_eq);
-    eps = max(abs(dr(:)));
+    eps = max(abs(dr(:)))
 end
 
 H_eq = r_grid - r_eq;
