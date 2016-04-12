@@ -6,9 +6,9 @@ c=1;
 
 rho=1;
 
-step = 0.0001;
-x=3.401:step:3.501;
-z=3.401:step:3.501;
+step = 0.01;
+x=-3.401:step:3.501;
+z=-3.401:step:3.501;
 
 [x,z] = meshgrid(x,z);
 y=0.001*z;
@@ -49,8 +49,8 @@ quiver(x,z,fx,fz,'Color','b');
 quiver(x,z,ax,az,'Color','r');
 plot(xell,zell,'-k');
 axis equal
-xlim([3.4 3.5]);
-ylim([3.4 3.5]);
+xlim([-3.4 3.5]);
+ylim([-3.4 3.5]);
 
 dv=sqrt((ax-fx).^2+(az-fz).^2);
 amag=sqrt(ax.*ax+az.*az);
@@ -65,8 +65,8 @@ plot(xell,zell,'-k');
 axis equal
 caxis([-16 5]);
 colorbar
-xlim([3.4 3.5]);
-ylim([3.4 3.5]);
+xlim([-3.4 3.5]);
+ylim([-3.4 3.5]);
 
 w = x.*x./a./a + z.*z./c./c;
 
