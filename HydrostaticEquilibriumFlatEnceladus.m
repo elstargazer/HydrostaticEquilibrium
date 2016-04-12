@@ -4,14 +4,14 @@ tic;
 %% Input parameters
 G=6.67384e-11;
 
-GM=2.5026e9;
-T=0.942*24;
+GM=7.210443e9;
+T=1.370218*24;
 
-Rref=198200;
+Rref=252100;
 
-fntsize=20;
-fntsize_sm=18;
-imsize=[54 38];
+fntsize=12;
+fntsize_sm=10;
+imsize=[13 9];
 
 %% Preliminary conmutations
 
@@ -27,85 +27,74 @@ V=4/3*pi*R.^3;
 router=(V./(4/3*pi)).^(1/3);
 rhomean=M./V;
 
-
-
-
 %% Grid of core radii and densities
-rcore=20000:7500:Rref;
-rhocoreg=rhomean:100:3000;
+Npts = 30;
 
-[rhocorei,rcorei]=meshgrid(rhocoreg,rcore);
+rcore=linspace(1000,Rref-1000,Npts);
+rhocore=linspace(rhomean,3000,Npts);
+
+[rhocorei,rcorei]=meshgrid(rhocore,rcore);
 
 rhoouteri=-(3*M-4*pi*(rcorei.^3).*rhocorei)./(4*pi*(rcorei.^3)-4*pi*(router^3));
 rhoouteri(rhoouteri<0)=NaN;
 
-M=4;
+order = 4; 
 
-[fp1,fp2,fq1,fq2]=HydrostaticStateAn2lTidalGrid...
-    (router,rcorei,T,rhoouteri,rhocorei,M);
+[fp1a,fp2a,fq1a,fq2a]=HydrostaticStateAn2lTidalGrid...
+    (router,rcorei,T,rhoouteri,rhocorei,order);
 
 tic
 [fp1n,fp2n,fq1n,fq2n]=HydrostaticStateExact2lTidalGrid...
     (router,rcorei,T,rhoouteri,rhocorei);
 toc
 
-% [fp1,fp2,fq1,fq2]=HydrostaticStateAn2lTidalGrid...
-%     (router,100000,T,1000,2000,4);
+%% Compute gravity coeffs
 
-%% Plotting settings
+[J2a,C22a]=RadFlat2J2Tri(router,rcorei,...
+    fp1a,fp2a,fq1a,fq2a,rhoouteri,rhocorei,Rref);
+
+[J2n,C22n]=RadFlat2J2Tri(router,rcorei,...
+    fp1n,fp2n,fq1n,fq2n,rhoouteri,rhocorei,Rref);
+
+fsa=fp1a./(fp1a-fq1a);
+fsn=fp1n./(fp1n-fq1n);
+
+fga=(J2a/NormCoef(2,0))./(C22a/NormCoef(2,2));
+fgn=(J2n/NormCoef(2,0))./(C22n/NormCoef(2,2));
+
+%% Plotting 
+
 fig1=figure; hold on;
 ax1=gca;
 set(ax1,'FontSize',fntsize);
 box on;
 
-xlim([10 250]);
-ylim([1000 3000]);
+xlim([0 R]/1000);
+ylim([rhomean 3000]);
 
 xlabel('Core size [km]','FontSize',fntsize);
 ylabel('Core density [kg/m^3]','FontSize',fntsize);
 
-%% Contour mantle density
-%
+% plot shell density
 pcolor(rcorei/1000,rhocorei,rhoouteri); shading interp;
 cbar=colorbar('FontSize',fntsize);
 ylabel(cbar,'Outer density [kg/m^3] ','FontSize',fntsize);
-
 caxis([920 rhomean]);
+
+% plot homogeneous line
 plot(get(gca,'xlim'),[rhomean rhomean],'--k','LineWidth',3);
 set(gcf, 'Units','centimeters', 'Position',[0 0 imsize])
 
-%%
+% plot hydrostatic ratio
 
-fs=fp1./(fp1-fq1);
-fsn=fp1n./(fp1n-fq1n);
-
-% levels=0:0.001:10;
-% contour(rcorei/1000,rhocorei,real(fp2),levels,...
-% 'Color','k','ShowText','on');
-%
-levels=1:0.01:8;
-% contour(rcorei/1000,rhocorei,(fs),levels,...
+% levels=(1:0.01:8);
+% contour(rcorei/1000,rhocorei,real(fga),levels,...
 %     'Color','k','ShowText','on');
-%
-contour(rcorei/1000,rhocorei,(fsn),levels,...
-    'Color','k','ShowText','on','Color','m');
 
-%%
-
-[J2,C22]=RadFlat2J2Tri(router,rcorei,...
-    fp1,fp2,fq1,fq2,rhoouteri,rhocorei,Rref);
-
-[J2n,C22n]=RadFlat2J2Tri(router,rcorei,...
-    fp1n,fp2n,fq1n,fq2n,rhoouteri,rhocorei,Rref);
-
-fg=J2./C22;
-fgn=J2n./C22n;
-
-levels=-(1:0.01:8);
-contour(rcorei/1000,rhocorei,real(fg),levels,...
-    'Color','k','ShowText','on');
-
+levels=(1:0.001:8);
 contour(rcorei/1000,rhocorei,real(fgn),levels,...
     'Color','m','ShowText','on');
+
+% pcolor(rcorei/1000,rhocorei,real(fga)); shading interp
 
 
