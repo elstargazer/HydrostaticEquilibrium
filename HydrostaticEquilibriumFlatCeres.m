@@ -8,7 +8,7 @@ T    = 9.073859324514187; % DLR
 %  T = 8.46;
 Rref = 470000;
 
-Npts = 120;
+Npts = 30;
 
 ell     = [ 483.2541034821433 480.9849831138582  445.9487550311291]*1000;
 % ell_eq = [481.85802     481.14698     447.03731]*1000;
@@ -18,6 +18,9 @@ ell_err = [0.0 0.0 0.0];
 J2obs   = 1.185090505130000e-2;
 J4obs   = - 5.7288e-04;
 
+J4hyd = -5.1887e-04
+
+
 offset  = 0.9694*1000;
 % OpNav5 JPL shape
 
@@ -26,9 +29,9 @@ offset  = 0.9694*1000;
 
 fpb1_obs = (ell(2)-ell(3))/ell(2);
 
-r2_min = 300000;
+r2_min = 10000;
 r2_max = 470000;
-rho2_max = 3200;
+rho2_max = 4000;
 
 %% figure settings
 
@@ -406,8 +409,8 @@ h_f_err = plot(NaN,'--r');
 
 % J2 constraint
 contour(r2i/1000,rho2i,J2hi,[J2obs J2obs],...
-    'Color','m','LineStyle','-','LineWidth',3);
-h_js = plot(NaN,'-m','LineWidth',3);
+    'Color','b','LineStyle','-','LineWidth',3);
+h_j = plot(NaN,'-b','LineWidth',3);
 
 % plot confidence limits
 contour(r2i/1000,rho2i,J2hi,[J2obs J2obs]*(1+0.0314),...
@@ -418,13 +421,13 @@ contour(r2i/1000,rho2i,J2hi,[J2obs J2obs]*(1-0.0314),...
     'Color','b','LineStyle','--','LineWidth',1);
 h_j_err = plot(NaN,'-b');
 
-% J4 constraint
-% contour(r2i/1000,rho2i,J4hi,[J4obs J4obs],...
-%     'Color','b','LineStyle','-','LineWidth',3);
-% h_j4 = plot(NaN,'-r','LineWidth',2);
+%J4 constraint
+contour(r2i/1000,rho2i,J4hi,[-5.3334e-04 -5.3334e-04],...
+    'Color','y','LineStyle','-','LineWidth',3);
+h_j4 = plot(NaN,'-y','LineWidth',2);
 
-legend([h_f h_j h_js h_Z_sol],{'Shape solution','Gravity solution','Solution for T = 8.46 [h]','Admittance solution'},'FontSize',fntsize,...
-    'Color','w','Color','w','TextColor','k');
+% legend([h_f h_j h_js h_Z_sol],{'Shape solution','Gravity solution','Solution for T = 8.46 [h]','Admittance solution'},'FontSize',fntsize,...
+%     'Color','w','Color','w','TextColor','k');
 
 clabel(C_I,h,'manual','FontSize',fntsize_sm,...
     'Color','k','EdgeColor','k','BackGroundColor','w');
@@ -450,7 +453,7 @@ plot_rd = plot(get(gca,'XLim'),[lambda_rd lambda_rd],'--k');
 xlabel('Core size [km]','FontSize',fntsize);
 ylabel('\lambda','FontSize',fntsize);
 
-ylim([0.34 0.382]);
+ylim([0.34 0.42]);
 
 legend([pl_lambdaJ pl_lambdaf plot_rd],...
     {'$\lambda_{J_{2}}$','$\lambda_{f_{p}}$','$\lambda_{Radau-Darwin}$'},...
@@ -482,7 +485,7 @@ legend([h_st_J h_st_fp],{'Gravity solution','Shape solution'},'FontSize',fntsize
 xlabel('Shell density [kg/m^3]','FontSize',fntsize);
 ylabel('Shell thickness [km]','FontSize',fntsize);
 
-PrintWhite(fig_shell,[fig_folder 'Fig_IceThickness.jpg']);
+% PrintWhite(fig_shell,[fig_folder 'Fig_IceThickness.jpg']);
 
 
 
